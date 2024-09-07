@@ -31,7 +31,7 @@ export class GaussianBlurFilter implements IFilter {
     }
 
     set Iteration(value: number) {
-        this.iteration = Math.max(1, value);
+        this.iteration = Math.max(1, parseInt(value.toString(), 10));
     }
 
     get Iteration() {

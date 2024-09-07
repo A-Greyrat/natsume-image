@@ -126,6 +126,16 @@ export class ImageCanvas {
         this.updateWebGLContext();
     }
 
+    public removeFilter(filter: IFilter) {
+        this.filters = this.filters.filter((f) => f !== filter);
+        this.updateWebGLContext();
+    }
+
+    public clearFilters() {
+        this.filters = [];
+        this.updateWebGLContext();
+    }
+
     private constructor(
         img: TexImageSource,
         width: number,
@@ -165,6 +175,8 @@ export class ImageCanvas {
         this.frameBufferTextureB = frameBufferTextureB;
         this.glTexture = glTexture;
         this.blitShader = blitShader;
+
+        this.updateWebGLContext();
     }
 
     /**
