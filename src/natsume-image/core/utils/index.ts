@@ -1,7 +1,100 @@
+import { DEFAULT_FRAG_SHADER, DEFAULT_VERT_SHADER } from '../shader';
+
+export const initWebGLContext = (
+    gl: WebGL2RenderingContext | WebGLRenderingContext,
+    img: TexImageSource,
+    width: number,
+    height: number
+) => {
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    // 禁用深度测试、剔除面
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    // 启用混合
+    gl.enable(gl.BLEND);
+    // 混合模式为SRC_ALPHA, ONE_MINUS_SRC_ALPHA
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // 翻转Y轴
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    // mipmap的质量
+    gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
+
+    gl.viewport(0, 0, width, height);
+
+    // 帧缓冲
+    const [fa, ta] = createFrameBuffer(gl, width, height);
+    const [fb, tb] = createFrameBuffer(gl, width, height);
+
+    if (!fa || !fb || !ta || !tb) {
+        throw new Error('[ImageCanvas] Unable to create frame buffer');
+    }
+
+    // 创建纹理
+    const glTexture = gl.createTexture();
+    if (!glTexture) {
+        throw new Error('[ImageCanvas] Unable to create texture');
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, glTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+    // 生成mipmap
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    // 创建顶点缓冲
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0]), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    // 创建纹理缓冲
+    const textureBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    const blitShader = createShader(gl, DEFAULT_VERT_SHADER, DEFAULT_FRAG_SHADER)!;
+    if (!blitShader) {
+        throw new Error('[ImageCanvas] Unable to create shader');
+    }
+
+    gl.useProgram(blitShader);
+
+    const positionLocation = gl.getAttribLocation(blitShader, 'a_position');
+    const textureLocation = gl.getAttribLocation(blitShader, 'a_texCoord');
+
+    gl.enableVertexAttribArray(positionLocation);
+    gl.enableVertexAttribArray(textureLocation);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+    gl.vertexAttribPointer(textureLocation, 2, gl.FLOAT, false, 0, 0);
+
+    return {
+        glTexture,
+        frameBufferA: fa,
+        frameBufferB: fb,
+        frameBufferTextureA: ta,
+        frameBufferTextureB: tb,
+        blitShader,
+    };
+};
+
 export const createFrameBuffer = (
     gl: WebGL2RenderingContext | WebGLRenderingContext,
     width: number,
-    height: number,
+    height: number
 ): [WebGLFramebuffer | null, WebGLTexture | null] => {
     const frameBuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
@@ -27,12 +120,11 @@ export const createFrameBuffer = (
     return [frameBuffer, texture];
 };
 
-
 export const createShader = (
     gl: WebGL2RenderingContext | WebGLRenderingContext,
     vert: string,
     frag: string,
-    notBindTexture = false,
+    notBindTexture = false
 ): WebGLProgram | null => {
     const vertexShaderObj = gl.createShader(gl.VERTEX_SHADER);
     if (!vertexShaderObj) {
@@ -89,7 +181,7 @@ export const createShader = (
  * @param shader shader
  * @param width 宽度
  * @param height 高度
- * @param setUniforms 设置shader uniform
+ * @param setUniforms 设置shader uniform 变量
  */
 export const blitTexture = (
     gl: WebGL2RenderingContext | WebGLRenderingContext,
@@ -98,8 +190,7 @@ export const blitTexture = (
     shader: WebGLProgram,
     width: number,
     height: number,
-    setUniforms = () => {
-    },
+    setUniforms = () => {}
 ) => {
     gl.bindFramebuffer(gl.FRAMEBUFFER, dstFbo);
     gl.viewport(0, 0, width, height);
@@ -107,4 +198,8 @@ export const blitTexture = (
     setUniforms();
     gl.bindTexture(gl.TEXTURE_2D, srcTex);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+};
+
+export const clamp = (value: number, min: number, max: number) => {
+    return Math.min(max, Math.max(min, value));
 };
