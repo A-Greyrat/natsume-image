@@ -2,6 +2,11 @@ import { BRIGHTNESS_FRAG_SHADER, DEFAULT_VERT_SHADER } from '../shader';
 import { blitTexture, createShader } from '../utils';
 import { IFilter } from './type.ts';
 
+/**
+ * Brightness filter
+ * 亮度滤镜
+ * @param {number} brightness - Brightness 亮度，范围 0 ~ 1
+ */
 export class BrightnessFilter implements IFilter {
     private static vertexShader = DEFAULT_VERT_SHADER;
     private static fragmentShader = BRIGHTNESS_FRAG_SHADER;

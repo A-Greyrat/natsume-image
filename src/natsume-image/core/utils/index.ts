@@ -1,4 +1,5 @@
 import { DEFAULT_FRAG_SHADER, DEFAULT_VERT_SHADER } from '../shader';
+import { Color } from '../type';
 
 export const initWebGLContext = (
     gl: WebGL2RenderingContext | WebGLRenderingContext,
@@ -202,4 +203,43 @@ export const blitTexture = (
 
 export const clamp = (value: number, min: number, max: number) => {
     return Math.min(max, Math.max(min, value));
+};
+
+/**
+ * 将src的内容拷贝到dst
+ * webgl2 only
+ * webgl也有方法，待开发
+ * @param gl
+ * @param src
+ * @param dst
+ * @param srcWidth
+ * @param srcHeight
+ * @param dstWidth
+ * @param dstHeight
+ */
+export const blitFrameBuffer = (
+    gl: WebGL2RenderingContext | WebGLRenderingContext,
+    src: WebGLFramebuffer,
+    dst: WebGLFramebuffer,
+    srcWidth: number,
+    srcHeight: number,
+    dstWidth: number,
+    dstHeight: number
+) => {
+    if (gl instanceof WebGL2RenderingContext) {
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, src);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, dst);
+        gl.blitFramebuffer(0, 0, srcWidth, srcHeight, 0, 0, dstWidth, dstHeight, gl.COLOR_BUFFER_BIT, gl.LINEAR);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    } else {
+        console.error('blitFrameBuffer is only available in WebGL2');
+    }
+};
+
+export const clampColor = (color: Color): Color => {
+    return {
+        r: clamp(color.r, 0, 255),
+        g: clamp(color.g, 0, 255),
+        b: clamp(color.b, 0, 255),
+    };
 };

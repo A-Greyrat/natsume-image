@@ -1,2 +1,12 @@
 export { BrightnessFilter } from './brightness-filter.ts';
 export { GreyScaleFilter } from './grey-scale-filter.ts';
+export { GrainyBlurFilter } from './grainy-blur-filter.ts';
+export { SobelEdgeDetectionFilter } from './sobel-edge-detection.ts';
+export { RevertFilter } from './revert-filter.ts';
+export { TintFilter } from './tint-filter.ts';
+export { ContrastFilter } from './contrast-filter.ts';
+export { SaturationFilter } from './saturation-filter.ts';
+export { HueFilter } from './hue-filter.ts';
+export { BinarizationFilter } from './binarization-filter.ts';
+export { GaussianBlurFilter } from './gaussian-blur-filter.ts';
+export { BoxBlurFilter } from './box-blur-filter.ts';

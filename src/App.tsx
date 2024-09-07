@@ -1,8 +1,9 @@
-import { GreyScaleFilter, ImageCanvas } from './natsume-image';
+import { BinarizationFilter, GaussianBlurFilter, ImageCanvas } from './natsume-image';
 import { useEffect, useRef, useState } from 'react';
 
 let imageCanvas: ImageCanvas | null = null;
-const filter = new GreyScaleFilter(0);
+const filter = new GaussianBlurFilter();
+const bFilter = new BinarizationFilter(0.8);
 
 const App = () => {
     const imgRef = useRef<HTMLImageElement>(null);
@@ -23,6 +24,7 @@ const App = () => {
                 return;
             }
 
+            imageCanvas.addFilter(bFilter);
             imageCanvas.addFilter(filter);
             setRefresh((prev) => prev + 1);
         };
@@ -54,33 +56,63 @@ const App = () => {
                     width: '50%',
                 }}
             />
-            <button
-                onClick={() => {
-                    filter.GreyScale += 0.1;
-                    // 手动触发更新
+            <input
+                type="range"
+                min="0"
+                max="5"
+                step="0.1"
+                value={filter.Radius}
+                onChange={(e) => {
+                    filter.Radius = Number(e.target.value);
                     imageCanvas?.forceUpdate();
+                    setRefresh((prev) => prev + 1);
                 }}
-                disabled={!imageCanvas}
-            >
-                Add GreyScale
-            </button>
+            />
 
-            <button
-                onClick={() => {
-                    filter.GreyScale -= 0.1;
-                    // 手动触发更新
+            <input
+                type="range"
+                min="1"
+                max="10"
+                value={filter.Iteration}
+                onChange={(e) => {
+                    filter.Iteration = Number(e.target.value);
                     imageCanvas?.forceUpdate();
+                    setRefresh((prev) => prev + 1);
                 }}
-                disabled={!imageCanvas}
-            >
-                Reduce GreyScale
-            </button>
+            />
+
+            <input
+                type="range"
+                min="1"
+                max="10"
+                step="0.1"
+                value={filter.DownScale}
+                onChange={(e) => {
+                    filter.DownScale = Number(e.target.value);
+                    imageCanvas?.forceUpdate();
+                    setRefresh((prev) => prev + 1);
+                }}
+            />
+
+            <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={bFilter.Threshold}
+                onChange={(e) => {
+                    bFilter.Threshold = Number(e.target.value);
+                    imageCanvas?.forceUpdate();
+                    setRefresh((prev) => prev + 1);
+                }}
+            />
 
             <button
                 onClick={() => {
                     // 下载的图片尺寸要先设置为原始图片尺寸
                     imageCanvas?.updateSize(imgRef.current!.naturalWidth, imgRef.current!.naturalHeight);
                     imageCanvas?.getImageSrc().then((src) => {
+                        console.log(src);
                         const a = document.createElement('a');
                         a.href = src;
                         a.download = 'image.png';

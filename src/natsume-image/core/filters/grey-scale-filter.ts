@@ -2,6 +2,11 @@ import { DEFAULT_VERT_SHADER, GREYSCALE_FRAG_SHADER } from '../shader';
 import { blitTexture, clamp, createShader } from '../utils';
 import { IFilter } from './type.ts';
 
+/**
+ * Grey scale filter
+ * 灰度滤镜
+ * @param {number} greyScale - Grey scale 灰度，范围 0 ~ 1
+ */
 export class GreyScaleFilter implements IFilter {
     private static vertexShader = DEFAULT_VERT_SHADER;
     private static fragmentShader = GREYSCALE_FRAG_SHADER;

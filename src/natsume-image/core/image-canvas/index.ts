@@ -1,5 +1,5 @@
 import { blitTexture, createFrameBuffer, initWebGLContext } from '../utils';
-import { IFilter } from '../filters';
+import { IFilter } from '../filters/type';
 
 export class ImageCanvas {
     // canvas
@@ -47,14 +47,7 @@ export class ImageCanvas {
     }
 
     private updateWebGLContext() {
-        blitTexture(
-            this.gl,
-            this.glTexture,
-            this.frameBufferA,
-            this.blitShader,
-            this.width,
-            this.height
-        );
+        blitTexture(this.gl, this.glTexture, this.frameBufferA, this.blitShader, this.width, this.height);
 
         let srcFrameBuffer = this.frameBufferA;
         let dstFrameBuffer = this.frameBufferB;
@@ -82,6 +75,10 @@ export class ImageCanvas {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
 
+    /**
+     * 更新图片
+     * @param img 图片数据
+     */
     public updateImage(img: TexImageSource) {
         this.img = img;
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture);
@@ -89,6 +86,10 @@ export class ImageCanvas {
         this.updateWebGLContext();
     }
 
+    /**
+     * 获取图片数据
+     * @returns 图片数据，base64格式
+     */
     public async getImageSrc(): Promise<string> {
         if (this.glCanvas instanceof HTMLCanvasElement) {
             return Promise.resolve(this.glCanvas.toDataURL());
@@ -99,12 +100,17 @@ export class ImageCanvas {
         }
     }
 
+    /**
+     * 获取Canvas元素
+     */
     public getCanvas(): HTMLCanvasElement | OffscreenCanvas {
         return this.glCanvas;
     }
 
     /**
-     * 强制更新，在外部修改了Filter后调用
+     * 强制更新 \
+     * 在外部修改了Filter后调用 \
+     * 在requestAnimationFrame调用此方法可以做canvas动画
      */
     public forceUpdate() {
         this.updateWebGLContext();
