@@ -461,16 +461,16 @@ const filterList = [
     },
 ];
 
+type TFilterComponent = {
+    filter: IFilter;
+    component: (props: { filter: IFilter }) => JSX.Element;
+}[];
+
 const App = () => {
     const imgRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [_refresh, setRefresh] = useState(0);
-    const [renderList, setRenderList] = useState<
-        {
-            filter: IFilter;
-            component: (props: { filter: IFilter }) => JSX.Element;
-        }[]
-    >([]);
+    const [renderList, setRenderList] = useState<TFilterComponent>([]);
     useEffect(() => {
         const img = imgRef.current;
         const canvas = canvasRef.current;
@@ -480,6 +480,10 @@ const App = () => {
         }
 
         img.onload = () => {
+            if (imageCanvas) {
+                return;
+            }
+
             imageCanvas = ImageCanvas.createInstance(canvas, img, img.width, img.height);
             if (!imageCanvas) {
                 return;
@@ -502,7 +506,7 @@ const App = () => {
     return (
         <div>
             <img
-                src="/0.png"
+                src={`./1.png`}
                 alt=""
                 style={{
                     width: '50%',
@@ -513,6 +517,7 @@ const App = () => {
                 ref={canvasRef}
                 style={{
                     width: '50%',
+                    height: 'auto',
                 }}
             />
 
@@ -593,6 +598,30 @@ const App = () => {
             >
                 reset
             </button>
+
+            <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target?.result as string;
+                        img.onload = () => {
+                            imgRef.current!.src = img.src;
+
+                            imageCanvas?.updateImage(img);
+                            imageCanvas?.updateSize(img.width, img.height);
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                }}
+            />
         </div>
     );
 };

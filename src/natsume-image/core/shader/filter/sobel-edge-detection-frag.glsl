@@ -42,9 +42,10 @@ float sobel() {
 void main() {
     float edge = sobel();
     edge = smoothstep(0.0, 1.0, edge);
-    vec3 color = texture(u_image, v_texCoord).rgb;
+    vec4 t = texture(u_image, v_texCoord);
+    vec3 color = t.rgb;
     vec3 withEdgeColor = mix(mix(u_edgeColor, color, edge), color, 1.0 - u_intensity);
     vec3 onlyEdgeColor = mix(u_edgeColor, u_backgroundColor, edge);
 
-    fragColor = vec4(mix(withEdgeColor, onlyEdgeColor, float(u_edgeOnly)), 1.0);
+    fragColor = vec4(mix(withEdgeColor, onlyEdgeColor, float(u_edgeOnly)), t.a);
 }

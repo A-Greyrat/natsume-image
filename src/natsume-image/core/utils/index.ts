@@ -7,17 +7,17 @@ export const initWebGLContext = (
     width: number,
     height: number
 ) => {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(1.0, 1.0, 1.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     // 禁用深度测试、剔除面
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
     // 启用混合
     gl.enable(gl.BLEND);
-    // 混合模式为SRC_ALPHA, ONE_MINUS_SRC_ALPHA
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     // 翻转Y轴
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    // 预乘alpha
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
     // mipmap的质量
     gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
 

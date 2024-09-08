@@ -9,5 +9,5 @@ void main() {
     vec4 color = texture(u_image, v_texCoord);
     float luminance = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
     float binarized = step(u_threshold, luminance);
-    fragColor = vec4(vec3(binarized), 1.0);
+    fragColor = vec4(vec3(binarized), color.a);
 }

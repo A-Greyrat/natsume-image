@@ -47,6 +47,16 @@ export class ImageCanvas {
     }
 
     private updateWebGLContext() {
+        this.gl.clearColor(1.0, 1.0, 1.0, 0.0);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+
+        // 清空FrameBuffer
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBufferA);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frameBufferB);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+
         blitTexture(this.gl, this.glTexture, this.frameBufferA, this.blitShader, this.width, this.height);
 
         let srcFrameBuffer = this.frameBufferA;
@@ -83,6 +93,9 @@ export class ImageCanvas {
         this.img = img;
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
         this.updateWebGLContext();
     }
 
