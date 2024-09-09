@@ -25,7 +25,8 @@
     "noImplicitAny": false,
     "types": [
       "vite-plugin-glsl/ext"
-    ]
+    ],
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src"

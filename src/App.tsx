@@ -500,13 +500,14 @@ const App = () => {
 
         return () => {
             observer.disconnect();
+            imageCanvas = null;
         };
     }, []);
 
     return (
         <div>
             <img
-                src={`./1.png`}
+                src={`./mako.png`}
                 alt=""
                 style={{
                     width: '50%',
